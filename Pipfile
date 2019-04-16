@@ -10,6 +10,8 @@ flask = "*"
 flask-restful = "*"
 cerberus = "*"
 pymongo = "*"
+flask-jwt = "*"
+flask-jwt-extended = "*"
 
 [requires]
 python_version = "3.6"

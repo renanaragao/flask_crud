@@ -1,19 +1,17 @@
-from app.pessoa.repository import PessoaRepository
+import app.pessoa.repository as repo
 from app.pessoa.models import Pessoa
 
-pessoa_repository = PessoaRepository()
+
+def get_by_cpf(cpf):
+    return repo.get_by_cpf(cpf)
 
 
-class PessoaApplication(object):
+def insert(model):
+    pessoa = Pessoa(**model)
+    pessoa.ativar()
 
-    def get_by_cpf(self, cpf):
-        return pessoa_repository.get_by_cpf(cpf)
+    repo.insert(pessoa)
 
-    def insert(self, input):
-        pessoa = Pessoa(**input)
-        pessoa.ativar()
 
-        pessoa_repository.insert(pessoa)
-
-    def update(self, input):
-        pessoa_repository.update(Pessoa(**input))
+def update(model):
+    repo.update(Pessoa(**model))

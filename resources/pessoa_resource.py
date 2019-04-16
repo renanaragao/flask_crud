@@ -1,20 +1,21 @@
-from flask_restful import Resource, request
+import flask_restful
 from flask import jsonify
-from app.pessoa.validation import PessoaValidation
-from app.pessoa.application import PessoaApplication
-
-pessoa_application = PessoaApplication()
-pessoa_validation = PessoaValidation()
+from flask_jwt_extended import jwt_required
+from app.validation import *
+import app.pessoa.application as application
 
 
-class PessoaResource(Resource):
-    def _resp_400(self, errors):
-        resp = jsonify(errors)
-        resp.status_code = 400
-        return resp
+def _resp_400(errors):
+    resp = jsonify(errors)
+    resp.status_code = 400
+    return resp
 
+
+class PessoaResource(flask_restful.Resource):
+
+    @jwt_required
     def get(self, cpf):
-        find = pessoa_application.get_by_cpf(cpf)
+        find = application.get_by_cpf(cpf)
 
         if find is None:
             resp = jsonify()
@@ -23,24 +24,26 @@ class PessoaResource(Resource):
 
         return find
 
+    @jwt_required
     def post(self):
-        input = pessoa_validation.normalized(request.get_json())
+        pessoa = flask_restful.request.get_json()
 
-        is_valid, errors = pessoa_validation.validate(input)
+        is_valid, errors, normalized = validate(pessoa, schema='Pessoa')
 
         if not is_valid:
-            return self._resp_400(errors)
+            return _resp_400(errors)
 
-        return pessoa_application.insert(input)
+        return application.insert(normalized)
 
+    @jwt_required
     def put(self, cpf):
-        input = pessoa_validation.normalized(request.get_json())
+        pessoa = flask_restful.request.get_json()
 
-        input["cpf"] = cpf
+        pessoa["cpf"] = cpf
 
-        is_valid, errors = pessoa_validation.validate(input)
+        is_valid, errors, normalized = validate(pessoa, schema='Pessoa')
 
         if not is_valid:
-            return self._resp_400(errors)
+            return _resp_400(errors)
 
-        pessoa_application.update(input)
+        application.update(normalized)
